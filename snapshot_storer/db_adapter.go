@@ -16,3 +16,12 @@ func (c MongoClient) ConnectToDatabase() mgo.Session {
 	}
 	return *client
 }
+
+func (c MongoClient) insertToDatabase(dbName string, collectionName string, info bson.M) {
+	client := c.ConnectToDatabase()
+	collection := client.DB(dbName).C(collectionName)
+	err := collection.Insert(info)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
