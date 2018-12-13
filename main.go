@@ -1,6 +1,11 @@
 package main
 
-import "os"
+import (
+	"os"
+
+	"github.com/Ripolak/reddit-snapshots/reddit_snapshot_catcher"
+	"github.com/Ripolak/reddit-snapshots/snapshot_storer"
+)
 
 var (
 	clientID            = os.Getenv("CLIENT_ID")
@@ -14,5 +19,17 @@ var (
 )
 
 func main() {
+	snapshotConfig := snapshot_storer.LoadConfiguration(dbUrl, dbName, configCollection)
+	reddit := reddit_snapshot_catcher.RedditClient{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Username:     username,
+		Password:     password,
+	}
 
+	subreddits := snapshotConfig.Subreddits
+	for _, subreddit := range subreddits {
+		snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit["subreddit"].(string), "hot")
+		snapshot_storer.StoreItem(snapshot, dbUrl, dbName, snapshotsCollection)
+	}
 }
