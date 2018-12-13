@@ -20,3 +20,11 @@ func loadConfigurationFromDB(c MongoClient, dbName string, collectionName string
 	}
 	return result
 }
+
+func LoadConfiguration(dbUrl string, dbName string, configCollection string) Config {
+	client := MongoClient{
+		Url: dbUrl,
+	}
+	result := loadConfigurationFromDB(client, dbName, configCollection)
+	return result
+}
