@@ -1,7 +1,9 @@
 package main
 
 import (
+	"gopkg.in/mgo.v2/bson"
 	"os"
+	"sync"
 
 	"github.com/Ripolak/reddit-snapshots/reddit_snapshot_catcher"
 	"github.com/Ripolak/reddit-snapshots/snapshot_storer"
@@ -29,7 +31,7 @@ func main() {
 
 	subreddits := snapshotConfig.Subreddits
 	ch := make(chan reddit_snapshot_catcher.SubredditSnapshot, len(subreddits))
-	fetchSnapshots(ch)
+	fetchSnapshots(ch, subreddits)
 
 	for _, subreddit := range subreddits {
 		snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit["subreddit"].(string), "hot")
@@ -37,6 +39,7 @@ func main() {
 	}
 }
 
-func fetchSnapshots(ch chan reddit_snapshot_catcher.SubredditSnapshot) {
-
+func fetchSnapshots(ch chan reddit_snapshot_catcher.SubredditSnapshot, subreddits []bson.M) {
+	var wg sync.WaitGroup
+	wg.Add(len(subreddits))
 }
