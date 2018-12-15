@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"gopkg.in/mgo.v2/bson"
 	"os"
 	"sync"
@@ -41,10 +40,12 @@ func main() {
 
 func fetchSnapshots(subreddits []bson.M, redditClient reddit_snapshot_catcher.RedditClient) {
 	var wg sync.WaitGroup
-	wg.Add(len(subreddits) * 2)
+	wg.Add(len(subreddits))
 	ch := make(chan reddit_snapshot_catcher.SubredditSnapshot, len(subreddits))
 	takeSnapshots(subreddits, &wg, redditClient, ch)
+	wg.Wait()
 	close(ch)
+	wg.Add(len(subreddits))
 	storeSnapshots(ch, &wg)
 	wg.Wait()
 }
