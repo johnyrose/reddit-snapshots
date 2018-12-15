@@ -15,7 +15,7 @@ Run with the following environment variables for configuration:
 ## Example for configuration:
 ```
 { 
-    "_id" : ObjectId("5c122eb7a1783f58255167bd"), 
+    "_id" : ObjectId("<ID>"), 
     "subreddits" : [
         {
             "subreddit" : "dankmemes", 
