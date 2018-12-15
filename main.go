@@ -40,8 +40,8 @@ func main() {
 
 func fetchSnapshots(subreddits []bson.M) {
 	var wg sync.WaitGroup
-	wg.Add(len(subreddits))
+	wg.Add(len(subreddits) * 2)
 
 	ch := make(chan reddit_snapshot_catcher.SubredditSnapshot, len(subreddits))
-
+	wg.Wait()
 }
