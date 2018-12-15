@@ -1,6 +1,7 @@
 package snapshots_manager
 
 import (
+	"github.com/jzelinskie/reddit"
 	"gopkg.in/mgo.v2/bson"
 	"sync"
 
@@ -29,11 +30,11 @@ func fetchSnapshots(subreddits []bson.M) {
 func takeSnapshots(subreddits []bson.M, wg *sync.WaitGroup,
 	ch chan reddit_snapshot_catcher.SubredditSnapshot) {
 	for _, subreddit := range subreddits {
-		go func(subreddit string) {
+		go func(subreddit string, sort geddit.PopularitySort) {
 			defer wg.Done()
-			snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit, "hot")
+			snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit, sort)
 			ch <- snapshot
-		}(subreddit["subreddit"].(string))
+		}(subreddit["subreddit"].(string), subreddit["sort"].(geddit.PopularitySort))
 	}
 }
 
