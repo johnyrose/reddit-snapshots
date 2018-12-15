@@ -34,7 +34,7 @@ func takeSnapshots(subreddits []bson.M, wg *sync.WaitGroup,
 			defer wg.Done()
 			snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit, sort)
 			ch <- snapshot
-		}(subreddit["subreddit"].(string), subreddit["sort"].(geddit.PopularitySort))
+		}(subreddit["subreddit"].(string), geddit.PopularitySort(subreddit["sort"].(string)))
 	}
 }
 
