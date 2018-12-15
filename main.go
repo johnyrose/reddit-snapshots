@@ -30,8 +30,7 @@ func main() {
 	}
 
 	subreddits := snapshotConfig.Subreddits
-	ch := make(chan reddit_snapshot_catcher.SubredditSnapshot, len(subreddits))
-	fetchSnapshots(ch, subreddits)
+	fetchSnapshots(subreddits)
 
 	for _, subreddit := range subreddits {
 		snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit["subreddit"].(string), "hot")
@@ -39,7 +38,10 @@ func main() {
 	}
 }
 
-func fetchSnapshots(ch chan reddit_snapshot_catcher.SubredditSnapshot, subreddits []bson.M) {
+func fetchSnapshots(subreddits []bson.M) {
 	var wg sync.WaitGroup
 	wg.Add(len(subreddits))
+
+	ch := make(chan reddit_snapshot_catcher.SubredditSnapshot, len(subreddits))
+
 }
