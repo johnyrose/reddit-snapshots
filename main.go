@@ -18,26 +18,25 @@ var (
 	dbName              = os.Getenv("DB_NAME")
 	snapshotsCollection = os.Getenv("SNAPSHOTS_COLLECTION")
 	configCollection    = os.Getenv("CONFIG_COLLECTION")
-)
-
-func main() {
-	snapshotConfig := snapshot_storer.LoadConfiguration(dbUrl, dbName, configCollection)
-	reddit := reddit_snapshot_catcher.RedditClient{
+	reddit              = reddit_snapshot_catcher.RedditClient{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Username:     username,
 		Password:     password,
 	}
+)
 
+func main() {
+	snapshotConfig := snapshot_storer.LoadConfiguration(dbUrl, dbName, configCollection)
 	subreddits := snapshotConfig.Subreddits
-	fetchSnapshots(subreddits, reddit)
+	fetchSnapshots(subreddits)
 }
 
-func fetchSnapshots(subreddits []bson.M, redditClient reddit_snapshot_catcher.RedditClient) {
+func fetchSnapshots(subreddits []bson.M) {
 	var wg sync.WaitGroup
 	wg.Add(len(subreddits))
 	ch := make(chan reddit_snapshot_catcher.SubredditSnapshot, len(subreddits))
-	takeSnapshots(subreddits, &wg, redditClient, ch)
+	takeSnapshots(subreddits, &wg, ch)
 	wg.Wait()
 	close(ch)
 	wg.Add(len(subreddits))
@@ -45,12 +44,12 @@ func fetchSnapshots(subreddits []bson.M, redditClient reddit_snapshot_catcher.Re
 	wg.Wait()
 }
 
-func takeSnapshots(subreddits []bson.M, wg *sync.WaitGroup, redditClient reddit_snapshot_catcher.RedditClient,
+func takeSnapshots(subreddits []bson.M, wg *sync.WaitGroup,
 	ch chan reddit_snapshot_catcher.SubredditSnapshot) {
 	for _, subreddit := range subreddits {
 		go func(subreddit string) {
 			defer wg.Done()
-			snapshot := reddit_snapshot_catcher.TakeSnapshot(redditClient, subreddit, "hot")
+			snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit, "hot")
 			ch <- snapshot
 		}(subreddit["subreddit"].(string))
 	}
