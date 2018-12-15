@@ -31,7 +31,7 @@ func main() {
 	}
 
 	subreddits := snapshotConfig.Subreddits
-	fetchSnapshots(subreddits)
+	fetchSnapshots(subreddits, reddit)
 
 	for _, subreddit := range subreddits {
 		snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit["subreddit"].(string), "hot")
