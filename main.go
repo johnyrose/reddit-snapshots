@@ -28,8 +28,15 @@ func main() {
 	}
 
 	subreddits := snapshotConfig.Subreddits
+	ch := make(chan reddit_snapshot_catcher.SubredditSnapshot, len(subreddits))
+	fetchSnapshots(ch)
+
 	for _, subreddit := range subreddits {
 		snapshot := reddit_snapshot_catcher.TakeSnapshot(reddit, subreddit["subreddit"].(string), "hot")
 		snapshot_storer.StoreItem(snapshot, dbUrl, dbName, snapshotsCollection)
 	}
+}
+
+func fetchSnapshots(ch chan reddit_snapshot_catcher.SubredditSnapshot) {
+
 }
