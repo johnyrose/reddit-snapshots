@@ -2,7 +2,9 @@ package manager
 
 import (
 	"github.com/jzelinskie/reddit"
+	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/mgo.v2/bson"
+	"log"
 	"sync"
 
 	"github.com/Ripolak/reddit-snapshots/catcher"
@@ -24,6 +26,18 @@ type redditConfig struct {
 }
 
 func Entrypoint() {
+
+	var db dbConfig
+	err := envconfig.Process("", &db)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var reddit redditConfig
+	err = envconfig.Process("", &reddit)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	snapshotConfig := storer.LoadConfiguration(dbUrl, dbName, configCollection)
 	subreddits := snapshotConfig.Subreddits
 	fetchSnapshots(subreddits)
