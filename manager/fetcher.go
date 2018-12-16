@@ -20,11 +20,13 @@ func fetchSnapshots(subreddits []bson.M) {
 	wg.Add(len(subreddits))
 	ch := make(chan catcher.SubredditSnapshot, len(subreddits))
 	takeSnapshots(subreddits, &wg, ch)
-	wg.Wait()
-	close(ch)
-	wg.Add(len(subreddits))
-	storeSnapshots(ch, &wg)
-	wg.Wait()
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	storeSnapshots(ch)
 }
 
 func takeSnapshots(subreddits []bson.M, wg *sync.WaitGroup,
@@ -38,11 +40,8 @@ func takeSnapshots(subreddits []bson.M, wg *sync.WaitGroup,
 	}
 }
 
-func storeSnapshots(ch chan catcher.SubredditSnapshot, wg *sync.WaitGroup) {
+func storeSnapshots(ch chan catcher.SubredditSnapshot) {
 	for msg := range ch {
-		go func(snap catcher.SubredditSnapshot) {
-			defer wg.Done()
-			storer.StoreItem(snap, dbUrl, dbName, snapshotsCollection)
-		}(msg)
+		storer.StoreItem(msg, dbUrl, dbName, snapshotsCollection)
 	}
 }
