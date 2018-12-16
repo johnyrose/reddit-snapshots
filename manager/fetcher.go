@@ -16,6 +16,13 @@ type dbConfig struct {
 	ConfigCollection    string
 }
 
+type redditConfig struct {
+	ClientID     string
+	ClientSecret string
+	Username     string
+	Password     string
+}
+
 func Entrypoint() {
 	snapshotConfig := storer.LoadConfiguration(dbUrl, dbName, configCollection)
 	subreddits := snapshotConfig.Subreddits
