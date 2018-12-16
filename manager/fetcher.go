@@ -42,23 +42,28 @@ func (c config) ProcessConfig() config {
 	return c
 }
 
+func (c config) GenerateReddit() catcher.RedditClient {
+	reddit := catcher.RedditClient{
+		ClientID:     c.RedditConfig.ClientID,
+		ClientSecret: c.RedditConfig.ClientSecret,
+		Username:     c.RedditConfig.Username,
+		Password:     c.RedditConfig.Password,
+	}
+	return reddit
+}
+
 func Entrypoint() {
 
 	var c config
 	c = c.ProcessConfig()
 
+	reddit := c.GenerateReddit()
 	snapshotConfig := storer.LoadConfiguration(c.DbConfig.DbUrl, c.DbConfig.DbName, c.DbConfig.ConfigCollection)
 	subreddits := snapshotConfig.Subreddits
-	fetchSnapshots(subreddits, c.RedditConfig, c.DbConfig)
+	fetchSnapshots(subreddits, reddit, c.DbConfig)
 }
 
-func fetchSnapshots(subreddits []bson.M, redditConfig redditConfig, dbConfig dbConfig) {
-	reddit := catcher.RedditClient{
-		ClientID:     redditConfig.ClientID,
-		ClientSecret: redditConfig.ClientSecret,
-		Username:     redditConfig.Username,
-		Password:     redditConfig.Password,
-	}
+func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, dbConfig dbConfig) {
 	var wg sync.WaitGroup
 	wg.Add(len(subreddits))
 	ch := make(chan catcher.SubredditSnapshot, len(subreddits))
