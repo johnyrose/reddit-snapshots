@@ -1,9 +1,9 @@
-package snapshots_manager
+package manager
 
 import (
 	"os"
 
-	"github.com/Ripolak/reddit-snapshots/reddit_snapshot_catcher"
+	"github.com/Ripolak/reddit-snapshots/catcher"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 	dbName              = os.Getenv("DB_NAME")
 	snapshotsCollection = os.Getenv("SNAPSHOTS_COLLECTION")
 	configCollection    = os.Getenv("CONFIG_COLLECTION")
-	reddit              = reddit_snapshot_catcher.RedditClient{
+	reddit              = catcher.RedditClient{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Username:     username,

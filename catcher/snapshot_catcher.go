@@ -1,4 +1,4 @@
-package reddit_snapshot_catcher
+package catcher
 
 import (
 	"github.com/jzelinskie/reddit"

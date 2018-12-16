@@ -1,4 +1,4 @@
-package snapshot_storer
+package storer
 
 import (
 	"github.com/globalsign/mgo"

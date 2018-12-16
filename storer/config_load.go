@@ -1,4 +1,4 @@
-package snapshot_storer
+package storer
 
 import (
 	"gopkg.in/mgo.v2/bson"
