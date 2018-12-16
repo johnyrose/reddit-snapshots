@@ -9,6 +9,13 @@ import (
 	"github.com/Ripolak/reddit-snapshots/storer"
 )
 
+type dbConfig struct {
+	DbUrl               string
+	DbName              string
+	SnapshotsCollection string
+	ConfigCollection    string
+}
+
 func Entrypoint() {
 	snapshotConfig := storer.LoadConfiguration(dbUrl, dbName, configCollection)
 	subreddits := snapshotConfig.Subreddits
