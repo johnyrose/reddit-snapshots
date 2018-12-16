@@ -1,7 +1,9 @@
 package main
 
-import "github.com/Ripolak/reddit-snapshots/snapshots_manager"
+import (
+	"github.com/Ripolak/reddit-snapshots/manager"
+)
 
 func main() {
-	snapshots_manager.Entrypoint()
+	manager.Entrypoint()
 }
