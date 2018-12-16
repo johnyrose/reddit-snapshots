@@ -25,6 +25,22 @@ type redditConfig struct {
 	Password     string `split_words:"true"`
 }
 
+type config struct {
+	DbConfig     dbConfig
+	RedditConfig redditConfig
+}
+
+func (c config) ProcessConfig() config {
+	err := envconfig.Process("", &c.DbConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = envconfig.Process("", &c.RedditConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func Entrypoint() {
 
 	var dbConfig dbConfig
