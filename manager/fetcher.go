@@ -44,20 +44,12 @@ func (c config) ProcessConfig() config {
 
 func Entrypoint() {
 
-	var dbConfig dbConfig
-	err := envconfig.Process("", &dbConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var redditConfig redditConfig
-	err = envconfig.Process("", &redditConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
+	var c config
+	c = c.ProcessConfig()
 
-	snapshotConfig := storer.LoadConfiguration(dbConfig.DbUrl, dbConfig.DbName, dbConfig.ConfigCollection)
+	snapshotConfig := storer.LoadConfiguration(c.DbConfig.DbUrl, c.DbConfig.DbName, c.DbConfig.ConfigCollection)
 	subreddits := snapshotConfig.Subreddits
-	fetchSnapshots(subreddits, redditConfig, dbConfig)
+	fetchSnapshots(subreddits, c.RedditConfig, c.DbConfig)
 }
 
 func fetchSnapshots(subreddits []bson.M, redditConfig redditConfig, dbConfig dbConfig) {
