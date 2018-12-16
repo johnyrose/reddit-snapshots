@@ -39,6 +39,7 @@ func (c config) ProcessConfig() config {
 	if err != nil {
 		log.Fatal(err)
 	}
+	return c
 }
 
 func Entrypoint() {
