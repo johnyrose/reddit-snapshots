@@ -19,7 +19,9 @@ func fetchSnapshots(subreddits []bson.M) {
 	var wg sync.WaitGroup
 	wg.Add(len(subreddits))
 	ch := make(chan catcher.SubredditSnapshot, len(subreddits))
-	takeSnapshots(subreddits, &wg, ch)
+	for _, subreddit := range subreddits {
+		go takeSnapshot(&wg, subreddit["subreddit"].(string), geddit.PopularitySort(subreddit["sort"].(string)), ch)
+	}
 
 	go func() {
 		wg.Wait()
@@ -29,15 +31,10 @@ func fetchSnapshots(subreddits []bson.M) {
 	storeSnapshots(ch)
 }
 
-func takeSnapshots(subreddits []bson.M, wg *sync.WaitGroup,
-	ch chan catcher.SubredditSnapshot) {
-	for _, subreddit := range subreddits {
-		go func(subreddit string, sort geddit.PopularitySort) {
-			defer wg.Done()
-			snapshot := catcher.TakeSnapshot(reddit, subreddit, sort)
-			ch <- snapshot
-		}(subreddit["subreddit"].(string), geddit.PopularitySort(subreddit["sort"].(string)))
-	}
+func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySort, ch chan catcher.SubredditSnapshot) {
+	defer wg.Done()
+	snapshot := catcher.TakeSnapshot(reddit, subreddit, sort)
+	ch <- snapshot
 }
 
 func storeSnapshots(ch chan catcher.SubredditSnapshot) {
