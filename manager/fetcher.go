@@ -12,17 +12,17 @@ import (
 )
 
 type dbConfig struct {
-	DbUrl               string
-	DbName              string
-	SnapshotsCollection string
-	ConfigCollection    string
+	DbUrl               string `split_words:"true"`
+	DbName              string `split_words:"true"`
+	SnapshotsCollection string `split_words:"true"`
+	ConfigCollection    string `split_words:"true"`
 }
 
 type redditConfig struct {
-	ClientID     string
-	ClientSecret string
-	Username     string
-	Password     string
+	ClientID     string `split_words:"true"`
+	ClientSecret string `split_words:"true"`
+	Username     string `split_words:"true"`
+	Password     string `split_words:"true"`
 }
 
 func Entrypoint() {
@@ -32,23 +32,30 @@ func Entrypoint() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var reddit redditConfig
-	err = envconfig.Process("", &reddit)
+	var redditConfig redditConfig
+	err = envconfig.Process("", &redditConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	snapshotConfig := storer.LoadConfiguration(dbUrl, dbName, configCollection)
 	subreddits := snapshotConfig.Subreddits
-	fetchSnapshots(subreddits)
+	fetchSnapshots(subreddits, redditConfig)
 }
 
-func fetchSnapshots(subreddits []bson.M) {
+func fetchSnapshots(subreddits []bson.M, redditConfig redditConfig) {
+	reddit := catcher.RedditClient{
+		ClientID:     redditConfig.ClientID,
+		ClientSecret: redditConfig.ClientSecret,
+		Username:     redditConfig.Username,
+		Password:     redditConfig.Password,
+	}
 	var wg sync.WaitGroup
 	wg.Add(len(subreddits))
 	ch := make(chan catcher.SubredditSnapshot, len(subreddits))
 	for _, subreddit := range subreddits {
-		go takeSnapshot(&wg, subreddit["subreddit"].(string), geddit.PopularitySort(subreddit["sort"].(string)), ch)
+		go takeSnapshot(&wg, subreddit["subreddit"].(string), geddit.PopularitySort(subreddit["sort"].(string)), ch,
+			reddit)
 	}
 
 	go func() {
@@ -59,7 +66,8 @@ func fetchSnapshots(subreddits []bson.M) {
 	storeSnapshots(ch)
 }
 
-func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySort, ch chan catcher.SubredditSnapshot) {
+func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySort, ch chan catcher.SubredditSnapshot,
+	reddit catcher.RedditClient) {
 	defer wg.Done()
 	snapshot := catcher.TakeSnapshot(reddit, subreddit, sort)
 	ch <- snapshot
