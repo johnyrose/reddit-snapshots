@@ -27,8 +27,8 @@ type redditConfig struct {
 
 func Entrypoint() {
 
-	var db dbConfig
-	err := envconfig.Process("", &db)
+	var dbConfig dbConfig
+	err := envconfig.Process("", &dbConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,12 +38,12 @@ func Entrypoint() {
 		log.Fatal(err)
 	}
 
-	snapshotConfig := storer.LoadConfiguration(dbUrl, dbName, configCollection)
+	snapshotConfig := storer.LoadConfiguration(dbConfig.DbUrl, dbConfig.DbName, dbConfig.ConfigCollection)
 	subreddits := snapshotConfig.Subreddits
-	fetchSnapshots(subreddits, redditConfig)
+	fetchSnapshots(subreddits, redditConfig, dbConfig)
 }
 
-func fetchSnapshots(subreddits []bson.M, redditConfig redditConfig) {
+func fetchSnapshots(subreddits []bson.M, redditConfig redditConfig, dbConfig dbConfig) {
 	reddit := catcher.RedditClient{
 		ClientID:     redditConfig.ClientID,
 		ClientSecret: redditConfig.ClientSecret,
@@ -63,7 +63,7 @@ func fetchSnapshots(subreddits []bson.M, redditConfig redditConfig) {
 		close(ch)
 	}()
 
-	storeSnapshots(ch)
+	storeSnapshots(ch, dbConfig)
 }
 
 func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySort, ch chan catcher.SubredditSnapshot,
@@ -73,8 +73,8 @@ func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySo
 	ch <- snapshot
 }
 
-func storeSnapshots(ch chan catcher.SubredditSnapshot) {
+func storeSnapshots(ch chan catcher.SubredditSnapshot, dbConfig dbConfig) {
 	for msg := range ch {
-		storer.StoreItem(msg, dbUrl, dbName, snapshotsCollection)
+		storer.StoreItem(msg, dbConfig.DbUrl, dbConfig.DbName, dbConfig.SnapshotsCollection)
 	}
 }
