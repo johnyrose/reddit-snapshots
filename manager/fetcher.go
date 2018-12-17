@@ -53,6 +53,16 @@ func (c config) GenerateReddit() catcher.RedditClient {
 	return reddit
 }
 
+func (c config) GenerateStorer() storer2.SnapshotStorer {
+	mongoClient := storer2.MongoClient{Url: c.DbConfig.DbUrl}
+	snapshotsStorer := storer2.DatabaseStorer{
+		MongoClient: mongoClient,
+		DbName:      c.DbConfig.DbName,
+		Collection:  c.DbConfig.SnapshotsCollection,
+	}
+	return snapshotsStorer
+}
+
 func Entrypoint() {
 
 	var c config
