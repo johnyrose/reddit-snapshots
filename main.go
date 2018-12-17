@@ -1,7 +1,7 @@
 package main
 
 import (
-	"snaps/manager"
+	"github.com/Ripolak/reddit-snapshots/manager"
 )
 
 func main() {
