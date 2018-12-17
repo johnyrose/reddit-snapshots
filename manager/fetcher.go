@@ -54,7 +54,7 @@ func (c config) GenerateReddit() catcher.RedditClient {
 }
 
 func (c config) GenerateStorer() storer2.SnapshotStorer {
-	mongoClient := storer2.MongoClient{Url: c.DbConfig.DbUrl}
+	mongoClient := storer2.NewMongoClient(c.DbConfig.DbUrl)
 	snapshotsStorer := storer2.DatabaseStorer{
 		MongoClient: mongoClient,
 		DbName:      c.DbConfig.DbName,

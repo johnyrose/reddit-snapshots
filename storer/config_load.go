@@ -10,7 +10,7 @@ type Config struct {
 	Subreddits []bson.M
 }
 
-func loadConfigurationFromDB(c MongoClient, dbName string, collectionName string) Config {
+func loadConfigurationFromDB(c mongoClient, dbName string, collectionName string) Config {
 	client := c.ConnectToDatabase()
 	collection := client.DB(dbName).C(collectionName)
 	var result Config
@@ -22,7 +22,7 @@ func loadConfigurationFromDB(c MongoClient, dbName string, collectionName string
 }
 
 func LoadConfiguration(dbUrl string, dbName string, configCollection string) Config {
-	client := MongoClient{
+	client := mongoClient{
 		Url: dbUrl,
 	}
 	result := loadConfigurationFromDB(client, dbName, configCollection)
