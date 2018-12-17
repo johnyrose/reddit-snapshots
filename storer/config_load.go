@@ -11,7 +11,7 @@ type Config struct {
 }
 
 func loadConfigurationFromDB(c mongoClient, dbName string, collectionName string) Config {
-	client := c.ConnectToDatabase()
+	client := c.Session
 	collection := client.DB(dbName).C(collectionName)
 	var result Config
 	err := collection.Find(nil).One(&result)
@@ -22,9 +22,7 @@ func loadConfigurationFromDB(c mongoClient, dbName string, collectionName string
 }
 
 func LoadConfiguration(dbUrl string, dbName string, configCollection string) Config {
-	client := mongoClient{
-		Url: dbUrl,
-	}
+	client := NewMongoClient(dbUrl)
 	result := loadConfigurationFromDB(client, dbName, configCollection)
 	return result
 }

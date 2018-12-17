@@ -5,7 +5,6 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/mgo.v2/bson"
 	"log"
-	storer2 "snaps/storer"
 	"sync"
 
 	"github.com/Ripolak/reddit-snapshots/catcher"
@@ -53,9 +52,9 @@ func (c config) GenerateReddit() catcher.RedditClient {
 	return reddit
 }
 
-func (c config) GenerateStorer() storer2.SnapshotStorer {
-	mongoClient := storer2.NewMongoClient(c.DbConfig.DbUrl)
-	snapshotsStorer := storer2.DatabaseStorer{
+func (c config) GenerateStorer() storer.SnapshotStorer {
+	mongoClient := storer.NewMongoClient(c.DbConfig.DbUrl)
+	snapshotsStorer := storer.DatabaseStorer{
 		MongoClient: mongoClient,
 		DbName:      c.DbConfig.DbName,
 		Collection:  c.DbConfig.SnapshotsCollection,
@@ -73,7 +72,7 @@ func Entrypoint() {
 	fetchSnapshots(subreddits, reddit, subredditStorer)
 }
 
-func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, subredditStorer storer2.SnapshotStorer) {
+func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, subredditStorer storer.SnapshotStorer) {
 	var wg sync.WaitGroup
 	wg.Add(len(subreddits))
 	ch := make(chan catcher.SubredditSnapshot, len(subreddits))
@@ -97,9 +96,8 @@ func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySo
 	ch <- snapshot
 }
 
-func storeSnapshots(ch chan catcher.SubredditSnapshot, snapshotStorer storer2.SnapshotStorer) {
+func storeSnapshots(ch chan catcher.SubredditSnapshot, snapshotStorer storer.SnapshotStorer) {
 	for msg := range ch {
-		log.Println(msg.Subreddit)
 		go snapshotStorer.StoreItem(msg)
 	}
 }
