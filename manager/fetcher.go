@@ -64,17 +64,16 @@ func (c config) GenerateStorer() storer2.SnapshotStorer {
 }
 
 func Entrypoint() {
-
 	var c config
 	c = c.ProcessConfig()
-
+	subredditStorer := c.GenerateStorer()
 	reddit := c.GenerateReddit()
 	snapshotConfig := storer.LoadConfiguration(c.DbConfig.DbUrl, c.DbConfig.DbName, c.DbConfig.ConfigCollection)
 	subreddits := snapshotConfig.Subreddits
-	fetchSnapshots(subreddits, reddit, c.DbConfig)
+	fetchSnapshots(subreddits, reddit, subredditStorer)
 }
 
-func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, dbConfig dbConfig) {
+func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, subredditStorer storer2.SnapshotStorer) {
 	var wg sync.WaitGroup
 	wg.Add(len(subreddits))
 	ch := make(chan catcher.SubredditSnapshot, len(subreddits))
@@ -88,7 +87,7 @@ func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, dbConfig d
 		close(ch)
 	}()
 
-	storeSnapshots(ch, dbConfig)
+	storeSnapshots(ch, subredditStorer)
 }
 
 func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySort, ch chan catcher.SubredditSnapshot,
