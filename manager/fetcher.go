@@ -2,65 +2,12 @@ package manager
 
 import (
 	"github.com/jzelinskie/reddit"
-	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/mgo.v2/bson"
-	"log"
 	"sync"
 
 	"github.com/Ripolak/reddit-snapshots/catcher"
 	"github.com/Ripolak/reddit-snapshots/storer"
 )
-
-type dbConfig struct {
-	DbUrl               string `split_words:"true"`
-	DbName              string `split_words:"true"`
-	SnapshotsCollection string `split_words:"true"`
-	ConfigCollection    string `split_words:"true"`
-}
-
-type redditConfig struct {
-	ClientID     string `split_words:"true"`
-	ClientSecret string `split_words:"true"`
-	Username     string `split_words:"true"`
-	Password     string `split_words:"true"`
-}
-
-type config struct {
-	DbConfig     dbConfig
-	RedditConfig redditConfig
-}
-
-func (c config) ProcessConfig() config {
-	err := envconfig.Process("", &c.DbConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = envconfig.Process("", &c.RedditConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return c
-}
-
-func (c config) GenerateReddit() catcher.RedditClient {
-	reddit := catcher.RedditClient{
-		ClientID:     c.RedditConfig.ClientID,
-		ClientSecret: c.RedditConfig.ClientSecret,
-		Username:     c.RedditConfig.Username,
-		Password:     c.RedditConfig.Password,
-	}
-	return reddit
-}
-
-func (c config) GenerateStorer() storer.SnapshotStorer {
-	mongoClient := storer.NewMongoClient(c.DbConfig.DbUrl)
-	snapshotsStorer := storer.DatabaseStorer{
-		MongoClient: mongoClient,
-		DbName:      c.DbConfig.DbName,
-		Collection:  c.DbConfig.SnapshotsCollection,
-	}
-	return snapshotsStorer
-}
 
 func Entrypoint() {
 	var c config
