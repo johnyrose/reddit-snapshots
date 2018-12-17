@@ -99,6 +99,7 @@ func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySo
 
 func storeSnapshots(ch chan catcher.SubredditSnapshot, snapshotStorer storer2.SnapshotStorer) {
 	for msg := range ch {
-		snapshotStorer.StoreItem(msg)
+		log.Println(msg.Subreddit)
+		go snapshotStorer.StoreItem(msg)
 	}
 }
