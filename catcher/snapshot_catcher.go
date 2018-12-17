@@ -27,7 +27,7 @@ func (s SubredditSnapshot) ToBsonM() bson.M {
 }
 
 func TakeSnapshot(client RedditClient, subreddit string, sort geddit.PopularitySort) SubredditSnapshot {
-	s := client.generateSession()
+	s := client.Session
 	opt := geddit.ListingOptions{}
 	items, err := s.SubredditSubmissions(subreddit, sort, opt)
 	if err != nil {

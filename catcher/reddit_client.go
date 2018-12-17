@@ -7,25 +7,22 @@ import (
 )
 
 type RedditClient struct {
-	ClientID     string
-	ClientSecret string
-	Username     string
-	Password     string
+	Session *geddit.OAuthSession
 }
 
-func (c RedditClient) generateSession() *geddit.OAuthSession {
+func NewRedditClient(clientID string, clientSecret string, username string, password string) RedditClient {
 	o, err := geddit.NewOAuthSession(
-		c.ClientID,
-		c.ClientSecret,
+		clientID,
+		clientSecret,
 		"test",
 		"http://redirect.url",
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = o.LoginAuth(c.Username, c.Password)
+	err = o.LoginAuth(username, password)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return o
+	return RedditClient{o}
 }

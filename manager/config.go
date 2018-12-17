@@ -39,12 +39,8 @@ func (c config) ProcessConfig() config {
 }
 
 func (c config) GenerateReddit() catcher.RedditClient {
-	reddit := catcher.RedditClient{
-		ClientID:     c.RedditConfig.ClientID,
-		ClientSecret: c.RedditConfig.ClientSecret,
-		Username:     c.RedditConfig.Username,
-		Password:     c.RedditConfig.Password,
-	}
+	reddit := catcher.NewRedditClient(c.RedditConfig.ClientID, c.RedditConfig.ClientSecret,
+		c.RedditConfig.Username, c.RedditConfig.Password)
 	return reddit
 }
 
