@@ -52,18 +52,27 @@ func (c config) GenerateReddit() catcher.RedditClient {
 	return reddit
 }
 
-func Entrypoint() {
+func (c config) GenerateStorer() storer.SnapshotStorer {
+	mongoClient := storer.NewMongoClient(c.DbConfig.DbUrl)
+	snapshotsStorer := storer.DatabaseStorer{
+		MongoClient: mongoClient,
+		DbName:      c.DbConfig.DbName,
+		Collection:  c.DbConfig.SnapshotsCollection,
+	}
+	return snapshotsStorer
+}
 
+func Entrypoint() {
 	var c config
 	c = c.ProcessConfig()
-
+	subredditStorer := c.GenerateStorer()
 	reddit := c.GenerateReddit()
 	snapshotConfig := storer.LoadConfiguration(c.DbConfig.DbUrl, c.DbConfig.DbName, c.DbConfig.ConfigCollection)
 	subreddits := snapshotConfig.Subreddits
-	fetchSnapshots(subreddits, reddit, c.DbConfig)
+	fetchSnapshots(subreddits, reddit, subredditStorer)
 }
 
-func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, dbConfig dbConfig) {
+func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, subredditStorer storer.SnapshotStorer) {
 	var wg sync.WaitGroup
 	wg.Add(len(subreddits))
 	ch := make(chan catcher.SubredditSnapshot, len(subreddits))
@@ -77,7 +86,7 @@ func fetchSnapshots(subreddits []bson.M, reddit catcher.RedditClient, dbConfig d
 		close(ch)
 	}()
 
-	storeSnapshots(ch, dbConfig)
+	storeSnapshots(ch, subredditStorer)
 }
 
 func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySort, ch chan catcher.SubredditSnapshot,
@@ -87,8 +96,8 @@ func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySo
 	ch <- snapshot
 }
 
-func storeSnapshots(ch chan catcher.SubredditSnapshot, dbConfig dbConfig) {
+func storeSnapshots(ch chan catcher.SubredditSnapshot, snapshotStorer storer.SnapshotStorer) {
 	for msg := range ch {
-		storer.StoreItem(msg, dbConfig.DbUrl, dbConfig.DbName, dbConfig.SnapshotsCollection)
+		go snapshotStorer.StoreItem(msg)
 	}
 }

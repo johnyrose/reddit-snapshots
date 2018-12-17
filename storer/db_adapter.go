@@ -6,20 +6,20 @@ import (
 	"log"
 )
 
-type MongoClient struct {
-	Url string
-}
-
-func (c MongoClient) ConnectToDatabase() mgo.Session {
-	client, err := mgo.Dial(c.Url)
+func NewMongoClient(url string) mongoClient {
+	client, err := mgo.Dial(url)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return *client
+	return mongoClient{*client}
 }
 
-func (c MongoClient) insertToDatabase(dbName string, collectionName string, info bson.M) {
-	client := c.ConnectToDatabase()
+type mongoClient struct {
+	Session mgo.Session
+}
+
+func (c mongoClient) insertToDatabase(dbName string, collectionName string, info bson.M) {
+	client := c.Session
 	collection := client.DB(dbName).C(collectionName)
 	err := collection.Insert(info)
 	if err != nil {
