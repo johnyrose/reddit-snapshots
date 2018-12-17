@@ -5,6 +5,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/mgo.v2/bson"
 	"log"
+	storer2 "snaps/storer"
 	"sync"
 
 	"github.com/Ripolak/reddit-snapshots/catcher"
@@ -87,8 +88,8 @@ func takeSnapshot(wg *sync.WaitGroup, subreddit string, sort geddit.PopularitySo
 	ch <- snapshot
 }
 
-func storeSnapshots(ch chan catcher.SubredditSnapshot, dbConfig dbConfig) {
+func storeSnapshots(ch chan catcher.SubredditSnapshot, snapshotStorer storer2.SnapshotStorer) {
 	for msg := range ch {
-		storer.StoreItem(msg, dbConfig.DbUrl, dbConfig.DbName, dbConfig.SnapshotsCollection)
+		snapshotStorer.StoreItem(msg)
 	}
 }

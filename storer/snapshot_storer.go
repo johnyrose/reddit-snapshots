@@ -4,7 +4,7 @@ import (
 	"github.com/Ripolak/reddit-snapshots/catcher"
 )
 
-type snapshotStorer interface {
+type SnapshotStorer interface {
 	StoreItem(subreddit catcher.SubredditSnapshot)
 }
 
