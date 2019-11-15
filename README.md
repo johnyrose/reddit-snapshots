@@ -9,7 +9,7 @@ Run with the following environment variables for configuration:
 - PASSWORD
 - DB_URL
 - DB_NAME (The name of the database)
-- SNAPSHOTS_COLLECTION (Tje collection in which the snapshots will be stored)
+- SNAPSHOTS_COLLECTION (The collection in which the snapshots will be stored)
 - CONFIG_COLLECTION (The collection in which the configuration will be stored)
 
 ## Example for configuration:
